@@ -83,20 +83,17 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const GlowCard = ({ children }) => {
+const GlowCard = ({ children, identifier }) => {
   const containerRef = useRef(null);
   const cardRef = useRef(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted || !containerRef.current || !cardRef.current) return;
+    if (typeof document === "undefined") return; // Prevent SSR issues
 
     const CONTAINER = containerRef.current;
     const CARD = cardRef.current;
+
+    if (!CONTAINER || !CARD) return;
 
     const CONFIG = {
       proximity: 40,
@@ -127,8 +124,7 @@ const GlowCard = ({ children }) => {
       ];
 
       let ANGLE =
-        (Math.atan2(event?.y - CARD_CENTER[1], event?.x - CARD_CENTER[0]) *
-          180) /
+        (Math.atan2(event?.y - CARD_CENTER[1], event?.x - CARD_CENTER[0]) * 180) /
         Math.PI;
 
       ANGLE = ANGLE < 0 ? ANGLE + 360 : ANGLE;
@@ -138,25 +134,10 @@ const GlowCard = ({ children }) => {
 
     document.body.addEventListener("pointermove", UPDATE);
 
-    const RESTYLE = () => {
-      CONTAINER.style.setProperty("--gap", CONFIG.gap);
-      CONTAINER.style.setProperty("--blur", CONFIG.blur);
-      CONTAINER.style.setProperty("--spread", CONFIG.spread);
-      CONTAINER.style.setProperty(
-        "--direction",
-        CONFIG.vertical ? "column" : "row"
-      );
-    };
-
-    RESTYLE();
-    UPDATE();
-
     return () => {
       document.body.removeEventListener("pointermove", UPDATE);
     };
-  }, [isMounted]);
-
-  if (!isMounted) return null; // Prevent rendering until mounted
+  }, [identifier]);
 
   return (
     <div ref={containerRef} className="glow-container">
