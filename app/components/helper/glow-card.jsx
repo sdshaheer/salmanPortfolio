@@ -81,14 +81,19 @@
 // export default GlowCard;
 
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const GlowCard = ({ children, identifier }) => {
+const GlowCard = ({ children }) => {
   const containerRef = useRef(null);
   const cardRef = useRef(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current || !cardRef.current) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !containerRef.current || !cardRef.current) return;
 
     const CONTAINER = containerRef.current;
     const CARD = cardRef.current;
@@ -149,7 +154,9 @@ const GlowCard = ({ children, identifier }) => {
     return () => {
       document.body.removeEventListener("pointermove", UPDATE);
     };
-  }, [identifier]);
+  }, [isMounted]);
+
+  if (!isMounted) return null; // Prevent rendering until mounted
 
   return (
     <div ref={containerRef} className="glow-container">
